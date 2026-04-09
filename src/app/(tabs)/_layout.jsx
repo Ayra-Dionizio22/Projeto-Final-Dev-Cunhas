@@ -1,32 +1,58 @@
-
-import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
-import { router, usePathname } from 'expo-router';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
+import * as ImagePicker from 'expo-image-picker';
+import { usePathname } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { ImageUp, Eclipse, Sun, SunMoon } from 'lucide-react-native';
-import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
-
+import { Eclipse, ImageUp, Sun, SunMoon } from 'lucide-react-native';
+import { useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 function TabsDrawerContent(props) {
   const pathname = usePathname();
+  const [foto, setFoto] = useState(null);
+
+  async function escolherImagem() {
+    const permissao = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissao.granted) {
+      Alert.alert("Permissão necessária", "Você precisa permitir acesso à galeria.");
+      return;
+    }
+
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!resultado.canceled) {
+      setFoto(resultado.assets[0].uri);
+    }
+  }
 
   return (
     <DrawerContentScrollView {...props}>
       <View style={style.container}>
+
         <Image
-          source={{ uri: "https://i.pravatar.cc/100" }}
+          source={
+            foto
+              ? { uri: foto }
+              : { uri: "https://i.pravatar.cc/119" }}
           width={64}
           height={64}
           style={style.avatar}
         />
+
         <View style={style.temaContainer}>
           <ImageUp style={{ color: "#6C63FF", marginTop: 10 }} />
-          <TouchableOpacity style={style.button}>
+          <TouchableOpacity style={style.button} onPress={escolherImagem}>
             <Text style={style.texto}>Editar foto</Text>
           </TouchableOpacity>
         </View>
 
         <View style={style.temaContainer}>
-          <Eclipse style={{ color: "#6C63FF", marginTop: 10 }} />
+          <Eclipse style={{ color: "#6C63FF", marginTop: 20 }} />
           <TouchableOpacity style={style.buttonMode}>
             <Sun style={{ color: "#6C63FF" }} />
             <Text style={style.texto}>Claro</Text>
@@ -34,7 +60,7 @@ function TabsDrawerContent(props) {
 
           <TouchableOpacity style={style.buttonMode}>
             <SunMoon style={{ color: "#6C63FF" }} />
-            <Text style={style.texto}>Claro</Text>
+            <Text style={style.texto}>Escuro</Text>
           </TouchableOpacity>
 
         </View>
@@ -70,11 +96,11 @@ const style = StyleSheet.create({
   },
 
   avatar: {
-    alignItems: "center",
+
     width: 80,
     height: 80,
     borderRadius: 50,
-    marginBottom: 30
+    marginBottom: 40
   },
 
   button: {
@@ -84,14 +110,15 @@ const style = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 1,
     borderColor: "#6C63FF",
-    paddingHorizontal: 85,
+    paddingHorizontal: 100,
     paddingVertical: 10,
-    marginBottom: 10,
+    marginBottom: 15,
   },
 
   temaContainer: {
     flexDirection: "row",
-    gap: 8,
+    gap: 10,
+    marginBottom: 10,
   },
 
   buttonMode: {
@@ -102,7 +129,6 @@ const style = StyleSheet.create({
     borderColor: "#6C63FF",
     paddingHorizontal: 45,
     paddingVertical: 5,
-    marginBottom: 10,
   },
 
   texto: {
